@@ -1,0 +1,50 @@
+sudo apt update
+sudo apt install nodejs
+node -v
+sudo apt install npm
+mkdir nodejsapp
+cd nodejsapp/
+vi hello_env.js
+		const http = require('http');
+
+		const hostname = '0.0.0.0';
+		const port = process.env.NODE_PORT || 3000;
+		const env = process.env;
+
+		const server = http.createServer((req, res) => {
+		  res.statusCode = 200;
+		  res.setHeader('Content-Type', 'text/plain');
+		  for (var k in env) {
+		    console.log("Env varria");
+		    res.write(k + ": " + env[k] + "\n");
+		  }
+		  res.end();
+		});
+
+		server.listen(port, hostname, () => {
+		  console.log("Server running at http://" + hostname + ":" + port + "/");
+		});
+/usr/bin/node /home/test/nodejsapp/hello_env.js 
+sudo vi /lib/systemd/system/hello_env.service
+		[Unit]
+		Description=hello_env.js - making your environment variables rad
+		Documentation=https://example.com
+		After=network.target
+
+		[Service]
+		Environment=NODE_PORT=3001
+		Type=simple
+		User=test
+		ExecStart=/usr/bin/node /home/test/nodejsapp/hello_env.js
+		Restart=on-failure
+
+		StandardOutput=append:/home/test/nodejsapp/app.log
+		StandardError=append:/home/test/nodejsapp/error.log
+		[Install]
+		WantedBy=multi-user.target
+sudo systemctl daemon-reload
+sudo systemctl start hello_env
+sudo systemctl status hello_env
+tail -f app.log 
+tail -f error.log
+
